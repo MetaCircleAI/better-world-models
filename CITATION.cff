@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you find this post useful, please cite it as below."
+title: "How Much Better Can World Models Get by Changing Only the Architecture?"
+authors:
+  - family-names: Huang
+    given-names: Bangzhe
+    affiliation: "MetaCircle AI; Department of Physics, Fudan University"
+  - family-names: Liu
+    given-names: Ziming
+    affiliation: "MetaCircle AI; College of AI, Tsinghua University"
+url: "https://metacircleai.github.io/better-world-models/"
+repository-code: "https://github.com/MetaCircleAI/better-world-models"
+license: CC-BY-4.0
+preferred-citation:
+  type: generic
+  title: "How Much Better Can World Models Get by Changing Only the Architecture?"
+  authors:
+    - family-names: Huang
+      given-names: Bangzhe
+    - family-names: Liu
+      given-names: Ziming
+  year: 2026
+  month: 11
+  publisher:
+    name: "MetaCircle AI"
+  url: "https://metacircleai.github.io/better-world-models/"

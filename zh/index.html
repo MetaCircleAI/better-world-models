@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>只换架构，世界模型还能强多少？</title>
+<meta name="description" content="常见的世界模型大致有三类：一类学习环境的动力学，用来训练具身控制策略；一类在视频中学习世界的物理规律；还有一类直接生成未来的画面。我们在这三类里各选了一个作为代表，只改进内部网络架构。平均下来，性能提升了 49.6%。">
+<link rel="canonical" href="https://metacircleai.github.io/better-world-models/zh/">
+<link rel="alternate" hreflang="en" href="https://metacircleai.github.io/better-world-models/">
+<link rel="alternate" hreflang="zh-CN" href="https://metacircleai.github.io/better-world-models/zh/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://metacircleai.github.io/better-world-models/zh/">
+<meta property="og:title" content="只换架构，世界模型还能强多少？">
+<meta property="og:description" content="常见的世界模型大致有三类：一类学习环境的动力学，用来训练具身控制策略；一类在视频中学习世界的物理规律；还有一类直接生成未来的画面。我们在这三类里各选了一个作为代表，只改进内部网络架构。平均下来，性能提升了 49.6%。">
+<meta property="og:image" content="https://metacircleai.github.io/better-world-models/assets/social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<main class="post">
+<nav class="lang-switch"><a href="../" hreflang="en">English</a></nav>
+<header class="post-header">
+<h1>只换架构，世界模型还能强多少？</h1>
+<p class="authors">Bangzhe Huang<sup>1,3</sup>, Ziming Liu<sup>1,2</sup></p>
+<p class="affils"><span><sup>1</sup> 元环智能</span><span><sup>2</sup> 清华大学人工智能学院</span><span><sup>3</sup> 复旦大学物理学系</span></p>
+</header>
+<p>常见的世界模型大致有三类：一类学习环境的动力学，用来训练具身控制策略；一类在视频中学习世界的物理规律；还有一类直接生成未来的画面。我们在这三类里各选了一个作为代表，只改进内部网络架构。平均下来，性能提升了 <strong>49.6%</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2610.28480">SuperMimic</a> 借助可微世界模型训练人形机器人，把 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2511.07820">SONIC</a> 需要 128 张 GPU 跑 7 天的训练，缩短到 1 张 GPU 跑 3 小时。我们重新设计了它的策略网络架构，结合一定的工程优化，把这 3 小时缩短到了 <strong>26.6 分钟</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2404.08471">V-JEPA</a> 是 Meta 提出的视频世界模型：它通过预测视频中被遮住的部分，从大量无标注视频中学习物理规律。在 3D 物理场景 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.01442">CLEVRER</a> 上，我们通过改进其编码器的架构，将碰撞预测的准确率从 <strong>59%</strong> 提升到了 <strong>86%</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2405.12399">DIAMOND</a> 用扩散模型逐帧生成 Atari 游戏画面，智能体在其“想象”的世界中玩游戏。在相同的训练和评测协议下，我们更换其去噪 U-Net 的架构，显著提升了生成质量：衡量生成视频与真实视频差距的 FVD 下降了 <strong>18.4%</strong>，逐帧的感知误差 LPIPS 下降了 <strong>7.4%</strong>。</p>
+<p>这三个结果说明了同一件事：在数据、规模和训练方法之外，世界模型的架构本身还远没有被挖掘充分。</p>
+<figure class="fig wide"><picture><source media="(max-width: 900px)" srcset="../figures/m/hero_cards_v1_3200.jpg"><img src="../figures/hero_cards_v1_3200.png" alt="图 1" decoding="async"></picture><figcaption><b>图 1</b>　三类世界模型，只换架构。左：SuperMimic 人形机器人动作跟踪。同一段动作（奔跑中侧身闪避、转身 270° 后继续跑），原架构中途摔倒，我们的架构完整跑完；达到 SuperMimic 训练 3 小时的水平，单张 GPU 只需 26.6 分钟。中：CLEVRER 3D 物理场景中的碰撞预测，准确率从 59% 提升到 86%。右：DIAMOND 生成过程示意。去噪网络根据过去几帧和动作生成下一帧，再把这一帧接回输入，继续往下想象；FVD 越低，生成的视频越接近真实。</figcaption></figure>
+
+<h2>被忽略的一环</h2>
+<p>过去两年，世界模型进展飞快。SuperMimic 用一个可微世界模型，让人形机器人在单张 GPU 上学会了十几万段动作；<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2506.09985">V-JEPA 2</a> 从海量视频里学到了物理直觉；<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2402.15391">Genie</a> 和 DIAMOND 能直接生成可以交互的虚拟世界。</p>
+<p>推动这些进展的，主要是更多的数据、更大的规模，以及更好的训练目标和方法。网络架构本身却很少成为主角：SuperMimic 的策略网络是多层 MLP，V-JEPA 的编码器是标准 ViT，DIAMOND 的去噪网络是标准 U-Net。架构往往是"够用就行"的默认选项，而不是被认真打磨的对象。</p>
+<p>我们想知道：如果只换架构，世界模型还能强多少？</p>
+<p>过去一段时间，我们一直在构建一个元模型。给定一个任务，它会为这个任务设计专门的网络架构。下面三个例子里的新架构，都出自它手。</p>
+<h2>例一：SuperMimic，控制型世界模型</h2>
+<p>SuperMimic 解决的是动作跟踪问题：给定一段人类动作，让 Unitree G1 人形机器人在物理仿真里把它做出来。它先学习一个可微的世界模型，预测机器人执行某个动作后的下一个状态；策略网络在这个世界模型的"想象"中展开 32 步，再把跟踪误差直接反向传播回策略。凭借这套方法，它用 1 张 H100 训练 3 小时，就超过了 SONIC 用 128 张 GPU 训练 7 天的效果。</p>
+<h3>原架构：先压缩，再决策</h3>
+<p>策略每一步要看两样东西：接下来 10 帧的参考动作（机器人"应该"怎么动），以及过去 10 帧的本体观测（机器人"实际"在怎么动）。原架构先用一个四层 MLP，把 10 帧参考动作压缩成一个 32 维向量；再把它和展平的历史观测拼接，交给另一个四层 MLP，输出 29 个关节的目标角度。整个策略约 912 万参数。</p>
+<h3>新架构：先联合交互，再分开精炼</h3>
+<p>我们把 10 帧参考动作和 10 帧历史观测各自变成 10 个 token，每个 token 对应一帧。20 个 token 先一起做一次 joint attention：参考帧和历史帧可以互相查看，但两组各用自己的 Q/K/V 投影，保留各自的身份。随后两组分开，各自经过一层 SwiGLU 精炼。最后把所有 token 展平，经过一个小 MLP 输出动作。</p>
+<p>新架构没有 32 维瓶颈，参数却只有 167 万，约为原来的五分之一。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/supermimic_architecture.jpg"><img src="../figures/supermimic_architecture.png" alt="图 2" loading="lazy" decoding="async"></picture><figcaption><b>图 2</b>　两种策略架构。左：SuperMimic 原架构，参考动作先经 MLP 压缩为 32 维向量，再与展平的历史观测拼接解码。右：我们的架构，参考帧与历史帧各投影为 10 个 token，先做一次 joint attention，再各自经过 SwiGLU，最后由动作头输出 29 个关节目标。</figcaption></figure>
+
+<h3>结果</h3>
+<p>我们让两个架构使用完全相同的训练配方，各训练 45 分钟后评测（表 1）。评测指标是 return，它衡量机器人把动作跟踪得有多准，满分为 1。</p>
+<p class="table-caption"><strong>表 1</strong> 同一训练配方下两种策略架构的对比。学习率 8e-4、EMA 0.98，单张 A100 训练 45 分钟，在 1 万段分层抽样的动作上评测；return 满分为 1。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">策略架构</th>
+<th style="text-align: right;">平均 return</th>
+<th style="text-align: right;">参数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">SuperMimic 原架构</td>
+<td style="text-align: right;">0.897</td>
+<td style="text-align: right;">9.12M</td>
+</tr>
+<tr>
+<td style="text-align: left;">我们的架构</td>
+<td style="text-align: right;"><strong>0.938</strong></td>
+<td style="text-align: right;"><strong>1.67M</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>同样 45 分钟，原架构因为单步更快，多训练了 1000 多步，return 却仍然明显更低。</p>
+<p>在这套配方上再做一些工程优化，新架构在单张 H100 上只需 26.6 分钟，return 就达到了 SuperMimic 训练 3 小时的水平（图 3）。图 1 左边是一个具体例子：在"奔跑中侧身闪避、转身 270° 后继续跑"这段动作上，原架构中途摔倒，新架构完整跑完。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/supermimic_speed_curve.jpg"><img src="../figures/supermimic_speed_curve.png" alt="图 3" loading="lazy" decoding="async"></picture><figcaption><b>图 3</b>　单张 H100 上 return 随训练时间的变化。灰线取自 SuperMimic 论文；紫线为我们的架构，每个点是一次全库评测（129,487 段动作），训练时间不含评测。虚线为目标 return 0.9363。</figcaption></figure>
+
+<h3>为什么有效</h3>
+<p>原架构隐含了一个要求：策略在看到机器人当前状态之前，就要先把未来 10 帧动作概括成一个 32 维向量。可是未来动作里哪些信息重要，恰恰取决于机器人此刻的状态。直觉上，快要失去平衡时，最该关注的是接下来一两帧怎么落脚；姿态稳定时，则可以看得更远。</p>
+<p>新架构把这个顺序倒了过来：先让历史帧和参考帧直接交互，每一帧历史观测都能找到与它相关的未来帧，然后两组再各自精炼。信息的取舍发生在"看过对方之后"，而不是之前。</p>
+<h2>例二：V-JEPA，表征型世界模型</h2>
+<p>第二个例子来自视频世界模型。我们用的是 CLEVRER，一个常用的 3D 物理推理数据集：桌面上有多个形状、颜色和材质各不相同的物体，它们在运动中相互碰撞，画面里还有阴影、反光和遮挡（图 4）。模型看 32 帧视频，要预测接下来 16 帧里会发生什么。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/clevrer_scene.gif"><img src="../figures/clevrer_scene.gif" alt="图 4" loading="lazy" decoding="async"></picture><figcaption><b>图 4</b>　CLEVRER 中的一段视频：多个物体在桌面上运动，并相互碰撞。</figcaption></figure>
+
+<p>训练沿用 V-JEPA 的思路，分两步。先在 8000 段 CLEVRER 视频上做自监督预训练：遮住一部分画面，让模型在表征空间里预测被遮住的内容，不使用任何标签。预训练结束后冻结整个模型，只在它的输出上训练一个读出网络来回答问题。两个模型的读出网络、训练数据和训练轮数完全相同，所以答得好不好，只取决于预训练有没有从视频里学到物理规律。</p>
+<h3>原架构：标准的 Transformer</h3>
+<p>基线是一个缩小版的 V-JEPA：视频缩放到 128×128，切成时空 patch，每个 patch 变成一个 token，再经过 4 层标准 Transformer。所有 token 在同一个序列里做自注意力，物体的位置、运动和相互关系，都要靠注意力自己去学。</p>
+<h3>新架构：计算图里多了一个时间差分</h3>
+<p>新架构的输入和基线完全相同，都是同一份 patch token。不同在于 token 进入网络之后怎么被处理（图 5）。编码器由一个小的计算图重复两次组成，图里用的都是常见的算子：</p>
+<ul>
+<li>时间差分 Δt：相邻两个时刻的 token 相减；之后依次是沿时间方向的卷积、沿空间方向的卷积、只沿时间轴的自注意力和一个 MLP。</li>
+<li>时空自注意力：在所有时空 token 上做自注意力，再用一次 cross-attention 读取 Δt 之后那几个节点的特征。</li>
+</ul>
+<p>两部分的输出合并后，接与基线相同的预测器和读出网络。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/clevrer_architecture.jpg"><img src="../figures/clevrer_architecture.png" alt="图 5" loading="lazy" decoding="async"></picture><figcaption><b>图 5</b>　两种视频编码器。左：缩小版 V-JEPA，patch token 依次经过 4 个标准 Transformer block，每个为自注意力加 MLP。右：我们的架构，同一个计算图重复两次：Δt（相邻时刻 token 之差）之后接时间卷积、空间卷积、时间轴自注意力和 MLP；时空自注意力之后接 cross-attention，读取 Δt 之后的特征。两者之后接相同的预测器和读出网络。参数量包含读出网络。</figcaption></figure>
+
+<h3>结果</h3>
+<p>两个模型使用相同的数据划分、预训练轮数和读出网络，总参数量也相当。只有一处不同：基线加了学习率 warmup，因为不加时它的表征会在训练早期塌缩；我们的架构不需要。读出网络按验证集选定后，只在 1000 段从未见过的测试视频上评测一次（表 2）。</p>
+<p class="table-caption"><strong>表 2</strong> CLEVRER 上的碰撞预测：接下来 16 帧里会不会发生碰撞。测试集共 1000 段视频；准确率为会撞与不会撞两类准确率的平均，随机为 50%；AUC 随机为 50，满分为 100。参数量为预训练模型（编码器和预测器）与读出网络之和，两者的读出网络完全相同。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">编码器架构</th>
+<th style="text-align: right;">准确率</th>
+<th style="text-align: right;">AUC</th>
+<th style="text-align: right;">参数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">V-JEPA（缩小版）</td>
+<td style="text-align: right;">59.0%</td>
+<td style="text-align: right;">67.0</td>
+<td style="text-align: right;">19.9M</td>
+</tr>
+<tr>
+<td style="text-align: left;">我们的架构</td>
+<td style="text-align: right;"><strong>85.7%</strong></td>
+<td style="text-align: right;"><strong>93.4</strong></td>
+<td style="text-align: right;">19.9M</td>
+</tr>
+</tbody>
+</table></div>
+<p>参数量相当，准确率高出约 27 个百分点。</p>
+<h3>更多问题，更难的测试</h3>
+<p>只判断"会不会撞"还不够。我们又让两个模型回答另外三类问题：会撞几次、第一次碰撞在什么时候、碰撞发生在桌面的哪个区域。随后在测试视频上加入训练时从没见过的干扰：画面平移、部分遮挡、降低帧率、镜头放大，以及换成新的颜色和光照（图 6）。题目和答案都不变，变的只是画面。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/clevrer_ood.jpg"><img src="../figures/clevrer_ood.png" alt="图 6" loading="lazy" decoding="async"></picture><figcaption><b>图 6</b>　同一段测试视频在五类干扰下的样子（各取最强一档，与模型实际看到的画面一致，遮挡位置用白框标出），以及两个模型在每类干扰下四类问题的平均得分。</figcaption></figure>
+
+<p class="table-caption"><strong>表 3</strong> 四类问题的平均得分，0 为随机，100 为全对。"加入干扰"为五类干扰各取最强一档后的平均；"全部答对"要求同一段视频的所有问题都答对，同样换算成 0 为随机。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: right;">V-JEPA（缩小版）</th>
+<th style="text-align: right;">我们的架构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">四类问题平均，原始视频</td>
+<td style="text-align: right;">21.1</td>
+<td style="text-align: right;"><strong>60.3</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">四类问题平均，加入干扰</td>
+<td style="text-align: right;">13.3</td>
+<td style="text-align: right;"><strong>41.8</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">全部答对，原始视频</td>
+<td style="text-align: right;">13.1</td>
+<td style="text-align: right;"><strong>51.8</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">全部答对，加入干扰</td>
+<td style="text-align: right;">6.1</td>
+<td style="text-align: right;"><strong>35.6</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>加入干扰后，基线"全部答对"的得分几乎跌回随机水平；我们的架构仍保留了约七成。</p>
+<h3>为什么有效</h3>
+<p>两个模型看到的信息完全一样：同一段视频、同一份 patch token。新架构没有引入任何额外的输入，区别只在于这些信息被怎样处理。</p>
+<p>判断会不会碰撞，关键在于物体怎么运动：往哪个方向走、走多快、会不会和别的物体相遇。这些信息本来就藏在相邻帧的差别里。原架构理论上也能把它算出来，但需要注意力在大量几乎一样的 token 中自己学会"比较相邻两帧"，学起来又慢又难。</p>
+<p>新架构把这一步直接写进了计算图：先比较相邻两帧，再用局部卷积和沿时间轴的注意力，把这些变化整理成连贯的运动；时空自注意力处理整体关系，并通过 cross-attention 读取整理好的运动信息。信息还是那些信息，只是被组织成了更适合回答物理问题的形式。基线则不同：它知道物体在哪里（"碰在哪个区域"一题它也答得不错），却很难预测物体会怎么动。</p>
+<h3>这个架构从哪里来</h3>
+<p>这个架构并不是在 CLEVRER 上设计的。元模型最初在一个更简单的 2D 世界里搜索架构：画面里一个红球匀速运动，判断它会不会撞上静止的方块。在那里，新架构把准确率从 67.4% 提高到了 95.8%。搬到 CLEVRER 时，我们没有改动它的结构，只是把输入换成 128×128 的视频、在新数据上从头训练。一个在简单世界里找到的结构，在复杂得多的 3D 场景里依然成立。</p>
+<h2>例三：DIAMOND，生成型世界模型</h2>
+<p>DIAMOND（NeurIPS 2024）是一个基于扩散模型的世界模型。给它过去 4 帧游戏画面和玩家的动作，它就生成下一帧；再把生成的这帧接回输入，就能一帧一帧地往下"想象"。DIAMOND 的智能体完全在这个想象出来的世界里学打游戏，所以画面生成得准不准，直接决定了智能体能学到什么。</p>
+<p>我们选了 Atari 游戏 Krull。为了单独比较世界模型本身，我们用 DIAMOND 官方发布的智能体在真实游戏里采集了约 50 万帧画面，按局划分为训练、验证和测试集。两个模型的训练配方完全相同：EDM 扩散目标，3 步采样，训练 10 万步。评测时从测试集的真实画面出发，给定真实的动作序列，让模型连续想象 50 帧，再和真实画面比较。</p>
+<h3>原架构：所有帧叠在一起处理</h3>
+<p>DIAMOND 的去噪网络是一个 4 层 U-Net。过去 4 帧和带噪声的当前帧在通道上拼成一张图，从第一层起就交给同一组卷积处理：一起下采样到 8×8，再一起上采样回 64×64。噪声强度和动作通过归一化层注入到每一个残差块。整个网络约 441 万参数。</p>
+<h3>新架构：先理解过去，再清理当前帧</h3>
+<p>新架构分成两条支路（图 7）。</p>
+<p>一条支路只看干净的历史：过去几帧、最后一帧，以及相邻两帧之差 Δt。它承担了几乎全部的计算，在 64×64 到 8×8 之间反复下采样、上采样，形成一个 W 形的多尺度结构，并在 16×16 的尺度上做了三次注意力。</p>
+<p>另一条支路接收带噪声的当前帧（与历史和 Δt 叠在一起），只经过一层卷积，始终保持全分辨率。两条支路直到最后才合并一次，输出去噪后的下一帧。</p>
+<p>新架构约 419 万参数，比原来略少。</p>
+<figure class="fig"><picture><source media="(max-width: 900px)" srcset="../figures/m/diamond_architecture.jpg"><img src="../figures/diamond_architecture.png" alt="图 7" loading="lazy" decoding="async"></picture><figcaption><b>图 7</b>　两种去噪网络。左：DIAMOND 原架构，历史帧与带噪声的当前帧在通道上拼接后，进入同一个 4 层 U-Net。右：我们的架构。历史支路只处理干净的历史和 Δt，在多个尺度间反复采样，并在 16×16 处做注意力；当前帧支路保持全分辨率，最后与历史支路合并。</figcaption></figure>
+
+<h3>结果</h3>
+<p class="table-caption"><strong>表 4</strong> Krull 上的想象质量。测试集 512 段固定片段，从真实画面出发连续想象 50 帧，3 个 seed 的平均。LPIPS 衡量每一帧与真实画面的感知差异，FVD 衡量生成视频整体与真实视频的差距，两者都是越低越好。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">去噪网络</th>
+<th style="text-align: right;">LPIPS ↓</th>
+<th style="text-align: right;">FVD ↓</th>
+<th style="text-align: right;">参数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">DIAMOND 原架构</td>
+<td style="text-align: right;">0.0383</td>
+<td style="text-align: right;">13.62</td>
+<td style="text-align: right;">4.41M</td>
+</tr>
+<tr>
+<td style="text-align: left;">我们的架构</td>
+<td style="text-align: right;"><strong>0.0355</strong></td>
+<td style="text-align: right;"><strong>11.11</strong></td>
+<td style="text-align: right;"><strong>4.19M</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>参数更少，FVD 下降 18.4%，LPIPS 下降 7.4%。</p>
+<h3>为什么有效</h3>
+<p>原架构让同一组卷积同时做两件事：从过去几帧推断物体怎么运动，以及从噪声里恢复当前帧的细节。前一件需要大的感受野和多个尺度，后一件需要保留像素级的细节，两者在同一个网络里互相牵制。</p>
+<p>新架构把它们分开了。深层的多尺度网络只看干净的历史，专心推断画面接下来会怎么变；带噪声的当前帧走一条全分辨率的捷径，到最后才借用前者的结论。</p>
+<p>新架构里的 Δt，也就是相邻两帧相减，和例二里用到的时间差分是同一种操作。一个用来理解视频，一个用来生成视频，元模型在两个完全不同的任务上都各自独立地选中了它。</p>
+<h2>小结</h2>
+<p>三个例子来自三类世界模型：一个在物理仿真里控制人形机器人，一个从视频里学习物理规律，一个直接生成未来的画面。我们没有改变数据和训练目标，只换了一个网络的架构。SuperMimic 在同样的训练时间下，return 从 0.897 提高到 0.938，再加上工程优化，达到原训练 3 小时的水平只需 26.6 分钟；CLEVRER 上的碰撞预测准确率从 59% 提升到 86%；DIAMOND 生成视频的 FVD 下降了 18.4%。</p>
+<p>三个新架构也有共同之处。原架构都采用了"一刀切"的处理方式：SuperMimic 先把参考动作压成一个 32 维向量，再和其他信息拼在一起；V-JEPA 把所有 token 交给同一种 block；DIAMOND 把带噪声的当前帧和历史叠成一张图，从头到尾一起处理。新架构则先让不同的信息按各自的特点处理，再在合适的位置交互。这些设计都不复杂，用的也都是常见组件，却没有出现在原本的架构里。</p>
+<p>这正是我们想说明的：在数据、规模和训练方法之外，世界模型的架构同样有很大的提升空间。</p>
+<h2>写在最后</h2>
+<p>这三个例子只是开始。我们正在把元模型用到更多领域上，包括时间序列、神经网络量子态、医学影像等等，后续结果会陆续分享。</p>
+<p>如果你也对架构设计感兴趣，或者手上有想让元模型试一试的任务，欢迎和我们交流。</p>
+<section class="cite">
+<h2>引用</h2>
+<p>如果这篇文章对你有帮助，欢迎引用：</p>
+<pre><code>@misc{huang2026betterworldmodels,
+  title        = {How Much Better Can World Models Get by Changing Only the Architecture?},
+  author       = {Huang, Bangzhe and Liu, Ziming},
+  year         = {2026},
+  month        = nov,
+  howpublished = {MetaCircle AI blog},
+  url          = {https://metacircleai.github.io/better-world-models/}
+}</code></pre>
+</section>
+<footer class="post-footer"><p>正文与图片采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh-hans">CC BY 4.0</a> 许可。</p></footer>
+</main>
+</body>
+</html>
