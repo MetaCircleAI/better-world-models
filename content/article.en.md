@@ -4,7 +4,7 @@ Bangzhe Huang¹ ³, Ziming Liu¹ ²
 
 ¹ MetaCircle AI　² College of AI, Tsinghua University　³ Department of Physics, Fudan University
 
-World models come in roughly three kinds: some learn the dynamics of an environment and use them to train embodied control policies, some learn how the physical world works from video, and some directly generate future frames. We picked one representative of each kind and changed nothing but its network architecture. On average, performance improved by **49.6%**.
+Most world models fall into three categories. Some learn the dynamics of an environment and use them to train embodied control policies, some learn how the physical world works from video, and some directly generate future frames. We picked one representative of each kind and changed nothing but its network architecture. On average, performance improved by **49.6%**.
 
 ![Figure 1](figures/hero_cards_v1_3200.png)
 
