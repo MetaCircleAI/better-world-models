@@ -65,6 +65,8 @@ With some further engineering optimizations on top of this recipe, our architect
 
 **Figure 3** Return versus training time on a single H100. The gray line is taken from the SuperMimic paper. The purple line is our architecture; each point is a full-library evaluation (129,487 motions), and training time excludes evaluation. The dashed line marks the target return of 0.9363.
 
+We have since turned this setting into the [SuperMimic Speedrun](https://github.com/MetaCircleAI/supermimic-speedrun), with fixed rules, our code and full training records, so anyone can reproduce the result or try to beat it.
+
 ### Why it works
 
 The original architecture carries a hidden assumption: before the policy has even seen the robot's current state, it must boil the next 10 frames of motion down to a 32-dimensional vector. But which parts of the upcoming motion matter depends precisely on the robot's state at that moment. Intuitively, when the robot is about to lose its balance, what matters most is where its feet land in the next frame or two; when its posture is stable, it can afford to look further ahead.

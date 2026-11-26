@@ -12,6 +12,8 @@ We took one representative of each common kind of world model and changed nothin
 - **Representation:** a [V-JEPA](https://arxiv.org/abs/2404.08471)-style video encoder on [CLEVRER](https://arxiv.org/abs/1910.01442) goes from 59% to 86% collision-prediction accuracy.
 - **Generation:** a new denoiser for [DIAMOND](https://arxiv.org/abs/2405.12399) on Atari Krull cuts FVD by 18.4% and LPIPS by 7.4%, with fewer parameters.
 
+Related: [SuperMimic Speedrun](https://github.com/MetaCircleAI/supermimic-speedrun), with open rules, code and training records for the control example.
+
 ## Citation
 
 ```bibtex
