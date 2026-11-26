@@ -6,7 +6,7 @@ Bangzhe Huang¹ ³, Ziming Liu¹ ²
 
 Most world models fall into three categories. Some learn the dynamics of an environment and use them to train embodied control policies, some learn how the physical world works from video, and some directly generate future frames. We picked one representative of each kind and changed nothing but its network architecture. On average, performance improved by **49.6%**.
 
-![Figure 1](figures/hero_cards_v1_3200.png)
+![Figure 1](figures/hero.png)
 
 **Figure 1** Three kinds of world models; only the architecture changes. Left: SuperMimic humanoid motion tracking. On the same motion (dodging sideways mid-run, then spinning 270° and running on), the original architecture falls halfway through, while ours completes the whole clip; matching SuperMimic's 3-hour training takes just 26.6 minutes on a single GPU. Middle: collision prediction in CLEVRER's 3D physics scenes, with accuracy rising from 59% to 86%. Right: how DIAMOND generates video. The denoising network produces the next frame from the past few frames and the action, then feeds it back in and keeps imagining from there; the lower the FVD, the closer the generated video is to real footage.
 

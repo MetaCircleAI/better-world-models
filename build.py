@@ -1,6 +1,6 @@
 """Build the English page (index.html) and the Chinese page (zh/index.html) from content/.
 
-Usage: pip install markdown && python build.py
+Usage: pip install -r requirements.txt && python build.py
 """
 import html
 import re
